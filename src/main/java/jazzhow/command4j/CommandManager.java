@@ -1,10 +1,10 @@
 package jazzhow.command4j;
 
 import jazzhow.command4j.model.MyProcess;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,7 +14,13 @@ public class CommandManager {
     private ConcurrentHashMap<String, MyProcess> processMap = new ConcurrentHashMap<>();
 
     public CommandManager() {
-        Runtime.getRuntime().addShutdownHook(new Thread(this::destroyAll));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                destroyAll();
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+            }
+        }));
     }
 
     @Override
@@ -30,15 +36,16 @@ public class CommandManager {
      * @param command
      * @return
      */
-    public synchronized void exec(String processId, String command) throws IOException {
+    public synchronized Process exec(String processId, String command) throws Exception {
         //先判断是否已存在此程序
         if (getProcess(processId) == null) {
             Process process = Runtime.getRuntime().exec(command);
             MyProcess myProcess = new MyProcess(processId, process, processMap);
             processMap.put(processId, myProcess);
             LOGGER.info("已启动程序" + processId);
+            return process;
         } else {
-            LOGGER.warn("已经存在此id " + processId + "对应的程序，请更换id再启动");
+            throw new Exception("已经存在此id " + processId + "对应的程序，请更换id再启动");
         }
     }
 
@@ -48,7 +55,7 @@ public class CommandManager {
      * @param processId
      * @return
      */
-    public synchronized void destroy(String processId) {
+    public synchronized Process destroy(String processId) throws Exception {
         LOGGER.info("正在关闭程序" + processId);
         MyProcess myProcess = processMap.get(processId);
         if (myProcess != null) {
@@ -60,8 +67,9 @@ public class CommandManager {
             } else {
                 LOGGER.info("该程序程序" + processId + "已处于关闭状态，无需再次关闭");
             }
+            return process;
         } else {
-            LOGGER.info("无法关闭不存在的程序" + processId);
+            throw new Exception("无法关闭不存在的程序" + processId);
         }
     }
 
@@ -70,14 +78,22 @@ public class CommandManager {
      *
      * @return
      */
-    public synchronized int destroyAll() {
+    public synchronized int destroyAll() throws Exception {
         ArrayList<String> ids = new ArrayList<>();
+        ArrayList<String> errList = new ArrayList<>();
         processMap.forEach((processId, myProcess) -> {
-            myProcess.getProcess().destroy();
-            ids.add(processId);
+            try {
+                myProcess.getProcess().destroy();
+                ids.add(processId);
+            } catch (Exception e) {
+                errList.add(e.getMessage());
+            }
         });
         for (String id : ids) {
             processMap.remove(id);
+        }
+        if (!errList.isEmpty()) {
+            throw new Exception(StringUtils.join(errList, ","));
         }
         return ids.size();
     }
