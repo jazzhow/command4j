@@ -1,9 +1,7 @@
 package jazzhow.command4j;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class Test1 {
@@ -15,7 +13,9 @@ public class Test1 {
         test.exec("test", cmd);
         TimeUnit.SECONDS.sleep(10);
         Process process = test.destroy("test");
-        System.out.println(process.isAlive());
+        if (process != null) {
+            System.out.println(process.isAlive());
+        }
 
         System.in.read();
     }

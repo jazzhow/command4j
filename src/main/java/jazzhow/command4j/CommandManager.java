@@ -1,7 +1,6 @@
 package jazzhow.command4j;
 
 import jazzhow.command4j.exceptions.ProcessExistException;
-import jazzhow.command4j.exceptions.ProcessNotExistException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +57,7 @@ public class CommandManager {
      * @param processId
      * @return
      */
-    public synchronized Process destroy(String processId) throws ProcessNotExistException {
+    public synchronized Process destroy(String processId) {
         LOGGER.info("正在关闭程序" + processId);
         CommandProcess myProcess = processMap.get(processId);
         if (myProcess != null) {
@@ -72,7 +71,7 @@ public class CommandManager {
             }
             return process;
         } else {
-            throw new ProcessNotExistException("无法关闭不存在的程序" + processId);
+            return null;
         }
     }
 
