@@ -1,17 +1,20 @@
 package jazzhow.command4j;
 
-import jazzhow.command4j.model.MyProcess;
+import jazzhow.command4j.exceptions.ProcessExistException;
+import jazzhow.command4j.exceptions.ProcessNotExistException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CommandManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandManager.class);
-    private ConcurrentHashMap<String, MyProcess> processMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, CommandProcess> processMap = new ConcurrentHashMap<>();
 
     public CommandManager() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -36,16 +39,16 @@ public class CommandManager {
      * @param command
      * @return
      */
-    public synchronized Process exec(String processId, String command) throws Exception {
+    public synchronized Process exec(String processId, String command) throws ProcessExistException, IOException {
         //先判断是否已存在此程序
         if (getProcess(processId) == null) {
             Process process = Runtime.getRuntime().exec(command);
-            MyProcess myProcess = new MyProcess(processId, process, processMap);
+            CommandProcess myProcess = new CommandProcess(processId, process, processMap);
             processMap.put(processId, myProcess);
             LOGGER.info("已启动程序" + processId);
             return process;
         } else {
-            throw new Exception("已经存在此id " + processId + "对应的程序，请更换id再启动");
+            throw new ProcessExistException("已经存在此id " + processId + "对应的程序，请更换id再启动");
         }
     }
 
@@ -55,9 +58,9 @@ public class CommandManager {
      * @param processId
      * @return
      */
-    public synchronized Process destroy(String processId) throws Exception {
+    public synchronized Process destroy(String processId) throws ProcessNotExistException {
         LOGGER.info("正在关闭程序" + processId);
-        MyProcess myProcess = processMap.get(processId);
+        CommandProcess myProcess = processMap.get(processId);
         if (myProcess != null) {
             myProcess.setNormalExit(true);
             Process process = myProcess.getProcess();
@@ -69,7 +72,7 @@ public class CommandManager {
             }
             return process;
         } else {
-            throw new Exception("无法关闭不存在的程序" + processId);
+            throw new ProcessNotExistException("无法关闭不存在的程序" + processId);
         }
     }
 
@@ -78,35 +81,35 @@ public class CommandManager {
      *
      * @return
      */
-    public synchronized int destroyAll() throws Exception {
-        ArrayList<String> ids = new ArrayList<>();
+    public synchronized List<Process> destroyAll() throws Exception {
+        ArrayList<Process> destroyProcessList = new ArrayList<>();
         ArrayList<String> errList = new ArrayList<>();
         processMap.forEach((processId, myProcess) -> {
             try {
                 myProcess.getProcess().destroy();
-                ids.add(processId);
+                destroyProcessList.add(myProcess.getProcess());
             } catch (Exception e) {
                 errList.add(e.getMessage());
             }
         });
-        for (String id : ids) {
+        for (Process id : destroyProcessList) {
             processMap.remove(id);
         }
         if (!errList.isEmpty()) {
             throw new Exception(StringUtils.join(errList, ","));
         }
-        return ids.size();
+        return destroyProcessList;
     }
 
 
-    public MyProcess getProcess(String processId) {
-        MyProcess myProcess = processMap.get(processId);
+    public CommandProcess getProcess(String processId) {
+        CommandProcess myProcess = processMap.get(processId);
         return myProcess;
     }
 
 
-    public Collection<MyProcess> getAllProcess() {
-        Collection<MyProcess> values = processMap.values();
+    public Collection<CommandProcess> getAllProcess() {
+        Collection<CommandProcess> values = processMap.values();
         return values;
     }
 

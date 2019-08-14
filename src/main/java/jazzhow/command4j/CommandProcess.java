@@ -1,4 +1,4 @@
-package jazzhow.command4j.model;
+package jazzhow.command4j;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,15 +8,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class MyProcess {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MyProcess.class);
+public class CommandProcess {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandProcess.class);
     private volatile boolean normalExit = false;
     private Process process;
     private String processId;
     private Thread errInput;
     private Thread stdInput;
 
-    public MyProcess(String processId, Process process, ConcurrentHashMap<String, MyProcess> processMap) {
+    public CommandProcess(String processId, Process process, ConcurrentHashMap<String, CommandProcess> processMap) {
         this.processId = processId;
         this.process = process;
         BufferedReader errBfReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
