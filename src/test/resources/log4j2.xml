@@ -11,7 +11,7 @@
     </appenders>
 
     <loggers>
-        <logger name="com.lanke.command4j" level="info"></logger>
+        <logger name="jazzhow.command4j" level="info"></logger>
         <root level="all">
             <appender-ref ref="Console"/>
         </root>
