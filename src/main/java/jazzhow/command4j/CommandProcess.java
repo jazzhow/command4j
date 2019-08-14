@@ -46,9 +46,9 @@ public class CommandProcess {
                     processMap.remove(processId);
                     int i = process.exitValue();
                     if (normalExit) {
-                        LOGGER.error("程序" + processId + "运行完毕，返回代码: " + i);
+                        LOGGER.info("程序" + processId + "运行完毕，返回代码: " + i);
                     } else {
-                        LOGGER.error("程序" + processId + "被外界环境关闭，返回代码: " + i);
+                        LOGGER.warn("程序" + processId + "被外界环境关闭，返回代码: " + i);
                     }
                 }
             }
