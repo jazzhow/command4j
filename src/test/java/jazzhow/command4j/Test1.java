@@ -1,4 +1,4 @@
-package com.lanke.command4j;
+package jazzhow.command4j;
 
 import org.junit.jupiter.api.Test;
 

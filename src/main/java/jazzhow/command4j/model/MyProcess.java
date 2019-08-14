@@ -1,4 +1,4 @@
-package com.lanke.command4j.model;
+package jazzhow.command4j.model;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
