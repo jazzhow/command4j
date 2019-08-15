@@ -39,12 +39,13 @@ public class CommandManager {
      * @return
      */
     public synchronized Process exec(String processId, String command) throws ProcessExistException, IOException {
+        LOGGER.info("正在启动程序 " + processId);
+        LOGGER.info("启动命令 " + command);
         //先判断是否已存在此程序
         if (getProcess(processId) == null) {
             Process process = Runtime.getRuntime().exec(command);
             CommandProcess myProcess = new CommandProcess(processId, process, processMap);
             processMap.put(processId, myProcess);
-            LOGGER.info("已启动程序" + processId);
             return process;
         } else {
             throw new ProcessExistException("已经存在此id " + processId + "对应的程序，请更换id再启动");
