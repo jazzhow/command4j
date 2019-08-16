@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -43,9 +44,10 @@ public class CommandManager {
         LOGGER.info("启动命令 " + command);
         //先判断是否已存在此程序
         if (getProcess(processId) == null) {
+            Date now = new Date();
             Process process = Runtime.getRuntime().exec(command);
-            CommandProcess myProcess = new CommandProcess(processId, process, processMap);
-            processMap.put(processId, myProcess);
+            CommandProcess commandProcess = new CommandProcess(processId, process, now, command, processMap);
+            processMap.put(processId, commandProcess);
             return process;
         } else {
             throw new ProcessExistException("已经存在此id " + processId + "对应的程序，请更换id再启动");
@@ -60,10 +62,10 @@ public class CommandManager {
      */
     public synchronized Process destroy(String processId) {
         LOGGER.info("正在关闭程序" + processId);
-        CommandProcess myProcess = processMap.get(processId);
-        if (myProcess != null) {
-            myProcess.setNormalExit(true);
-            Process process = myProcess.getProcess();
+        CommandProcess commandProcess = processMap.get(processId);
+        if (commandProcess != null) {
+            commandProcess.setNormalExit(true);
+            Process process = commandProcess.getProcess();
             if (process.isAlive()) {
                 process.destroy();
                 processMap.remove(processId);
@@ -84,10 +86,10 @@ public class CommandManager {
     public synchronized List<Process> destroyAll() throws Exception {
         ArrayList<Process> destroyProcessList = new ArrayList<>();
         ArrayList<String> errList = new ArrayList<>();
-        processMap.forEach((processId, myProcess) -> {
+        processMap.forEach((processId, commandProcess) -> {
             try {
-                myProcess.getProcess().destroy();
-                destroyProcessList.add(myProcess.getProcess());
+                commandProcess.getProcess().destroy();
+                destroyProcessList.add(commandProcess.getProcess());
             } catch (Exception e) {
                 errList.add(e.getMessage());
             }
@@ -103,8 +105,8 @@ public class CommandManager {
 
 
     public CommandProcess getProcess(String processId) {
-        CommandProcess myProcess = processMap.get(processId);
-        return myProcess;
+        CommandProcess commandProcess = processMap.get(processId);
+        return commandProcess;
     }
 
 

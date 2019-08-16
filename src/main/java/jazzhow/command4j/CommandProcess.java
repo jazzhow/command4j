@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CommandProcess {
@@ -13,12 +14,22 @@ public class CommandProcess {
     private volatile boolean normalExit = false;
     private Process process;
     private String processId;
+    /**
+     * 执行时间
+     */
+    private Date execTime;
+    /**
+     * 执行命令
+     */
+    private String command;
     private Thread errInput;
     private Thread stdInput;
 
-    public CommandProcess(String processId, Process process, ConcurrentHashMap<String, CommandProcess> processMap) {
+    public CommandProcess(String processId, Process process, Date execTime, String command, ConcurrentHashMap<String, CommandProcess> processMap) {
         this.processId = processId;
         this.process = process;
+        this.execTime = execTime;
+        this.command = command;
         BufferedReader errBfReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
         Thread errBfReaderThread = new Thread(() -> {
             try {
@@ -40,18 +51,17 @@ public class CommandProcess {
                 if (errBfReader != null) {
                     try {
                         errBfReader.close();
-                    } catch (IOException e) {
-                        LOGGER.error(e.getMessage(), e);
+                    } catch (IOException ignored) {
                     }
-                }
 
-                if (!process.isAlive()) {
-                    processMap.remove(processId);
-                    int i = process.exitValue();
-                    if (normalExit) {
-                        LOGGER.info("程序" + processId + "运行完毕，返回代码: " + i);
-                    } else {
-                        LOGGER.warn("程序" + processId + "被外界环境关闭，返回代码: " + i);
+                    if (!process.isAlive()) {
+                        processMap.remove(processId);
+                        int i = process.exitValue();
+                        if (normalExit) {
+                            LOGGER.info("程序" + processId + "运行完毕，返回代码: " + i);
+                        } else {
+                            LOGGER.warn("程序" + processId + "被外界环境关闭，返回代码: " + i);
+                        }
                     }
                 }
             }
@@ -77,8 +87,7 @@ public class CommandProcess {
                 if (stdBfReader != null) {
                     try {
                         stdBfReader.close();
-                    } catch (IOException e) {
-                        LOGGER.error(e.getMessage(), e);
+                    } catch (IOException ignored) {
                     }
                 }
             }
@@ -97,32 +106,15 @@ public class CommandProcess {
         return process;
     }
 
-    public void setProcess(Process process) {
-        this.process = process;
-    }
-
     public String getProcessId() {
         return processId;
     }
 
-    public void setProcessId(String processId) {
-        this.processId = processId;
+    public Date getExecTime() {
+        return execTime;
     }
 
-    public Thread getErrInput() {
-        return errInput;
+    public String getCommand() {
+        return command;
     }
-
-    public void setErrInput(Thread errInput) {
-        this.errInput = errInput;
-    }
-
-    public Thread getStdInput() {
-        return stdInput;
-    }
-
-    public void setStdInput(Thread stdInput) {
-        this.stdInput = stdInput;
-    }
-
 }

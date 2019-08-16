@@ -1,4 +1,8 @@
-# command4j
+# command4j java命令执行管理器
+ ## 作用
+ 调用系统的一些可执行软件，比如linux的shell脚本windows的bat、exe可执行文件
+ 
+ ## 说明
 java调用命令的工具
     @Test
     void test1() throws IOException, InterruptedException {
