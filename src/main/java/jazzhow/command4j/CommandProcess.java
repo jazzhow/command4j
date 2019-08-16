@@ -41,7 +41,7 @@ public class CommandProcess {
                         }
                         LOGGER.debug(line);
                     } catch (IOException e) {
-                        if (!process.isAlive()) {
+                        if (normalExit || !process.isAlive()) {
                             return;
                         }
                         LOGGER.error(e.getMessage(), e);
@@ -54,7 +54,7 @@ public class CommandProcess {
                     } catch (IOException ignored) {
                     }
 
-                    if (!process.isAlive()) {
+                    if (normalExit || !process.isAlive()) {
                         processMap.remove(processId);
                         int i = process.exitValue();
                         if (normalExit) {
@@ -77,7 +77,7 @@ public class CommandProcess {
                         }
                         LOGGER.debug(line);
                     } catch (IOException e) {
-                        if (!process.isAlive()) {
+                        if (normalExit || !process.isAlive()) {
                             return;
                         }
                         LOGGER.error(e.getMessage(), e);
