@@ -22,8 +22,6 @@ public class CommandProcess {
      * 执行命令
      */
     private String command;
-    private Thread errInput;
-    private Thread stdInput;
 
     public CommandProcess(String processId, Process process, Date execTime, String command, ConcurrentHashMap<String, CommandProcess> processMap) {
         this.processId = processId;
