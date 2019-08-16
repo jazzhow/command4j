@@ -30,6 +30,9 @@ public class CommandProcess {
                         }
                         LOGGER.debug(line);
                     } catch (IOException e) {
+                        if (!process.isAlive()) {
+                            return;
+                        }
                         LOGGER.error(e.getMessage(), e);
                     }
                 }
@@ -64,6 +67,9 @@ public class CommandProcess {
                         }
                         LOGGER.debug(line);
                     } catch (IOException e) {
+                        if (!process.isAlive()) {
+                            return;
+                        }
                         LOGGER.error(e.getMessage(), e);
                     }
                 }
