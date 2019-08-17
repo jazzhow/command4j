@@ -1,6 +1,6 @@
-package org.jazzhow.command4j;
+package com.github.jazzhow.command4j;
 
-import org.jazzhow.command4j.exceptions.ProcessExistException;
+import com.github.jazzhow.command4j.exceptions.ProcessExistException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

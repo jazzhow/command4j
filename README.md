@@ -8,7 +8,9 @@
  和错误输出，如果被调用的程序产生的输出较多，而且也不从缓冲中读走，那么时间长了就会导致被调用的程序阻塞。
  所以本项目就是为了解决此问题，而且不需要手动对 inputStream、errorStream的流进行处理，使用commandManager.exec("一个命令")即可，
  commandManager会自动帮你处理inputStream、errorStream的流,从而避免被调用的程序阻塞。
+
  ## 使用方法，以junit为例
+    ```Java
     @Test
     void test1() throws IOException, InterruptedException, ProcessExistException {
         //可执行的linux程序，或windows程序，cmd1 与 cmd2执行的内容可以相同可以不同。
@@ -39,6 +41,7 @@
         CommandProcess huhuhah = commandManager.destroy("呼呼哈哈");
         System.out.println("destroy传入commandManager中不存在的标识返回： " + huhuhah);
     }
+    ```
  ## 如何让被调用的程序输出或关闭输出
  本项目使用slf4j控制被调用的程序的输出，指定jazzhow.command4j的日志级别即可，level=debug可以看到被调用的程序的输出的输出，
  level=info只输出关键信息，等于其他请自行脑补。

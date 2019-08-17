@@ -1,6 +1,6 @@
-package org.jazzhow.command4j;
+package com.github.jazzhow.command4j;
 
-import org.jazzhow.command4j.exceptions.ProcessExistException;
+import com.github.jazzhow.command4j.exceptions.ProcessExistException;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 public class CommandManagerTest {
 
     @Test
-    void test1() throws IOException, InterruptedException, ProcessExistException {
+    public void test1() throws IOException, InterruptedException, ProcessExistException {
         //可执行的linux程序，或windows程序，cmd1 与 cmd2执行的内容可以相同可以不同。
         String cmd1 = "D:/software/ffmpeg/bin/ffmpeg -i rtsp://184.72.239.149/vod/mp4://BigBuckBunny_175k.mov -f flv -r 25 -g 25 -s 640x360 -an rtmp://localhost/live/test -vcodec copy  -f flv -an rtmp://localhost/live/test123HD";
         String cmd2 = "D:/software/ffmpeg/bin/ffmpeg -i rtsp://184.72.239.149/vod/mp4://BigBuckBunny_175k.mov -f flv -r 25 -g 25 -s 640x360 -an rtmp://localhost/live/test -vcodec copy  -f flv -an rtmp://localhost/live/test123HD";

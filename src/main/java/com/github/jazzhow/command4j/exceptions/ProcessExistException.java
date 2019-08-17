@@ -1,4 +1,4 @@
-package org.jazzhow.command4j.exceptions;
+package com.github.jazzhow.command4j.exceptions;
 
 public class ProcessExistException extends Exception {
     public ProcessExistException(String message) {
