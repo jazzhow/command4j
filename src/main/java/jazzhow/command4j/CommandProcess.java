@@ -68,10 +68,14 @@ public class CommandProcess {
             } finally {
                 if (processExitValue != null) {
                     if (normalExit) {
-                        LOGGER.info("程序" + processId + "运行完毕，返回代码: " + processExitValue);
+                        LOGGER.info("程序" + processId + "被关闭，返回代码: " + processExitValue);
                     } else {
-                        LOGGER.warn("程序" + processId + "被外界环境关闭，返回代码: " + processExitValue);
                         commandManager.removeFromProcessMap(processId);
+                        if (processExitValue.equals(0)) {
+                            LOGGER.info("程序" + processId + "运行完毕，返回代码: " + processExitValue);
+                        } else {
+                            LOGGER.warn("程序" + processId + "异常退出，返回代码: " + processExitValue);
+                        }
                     }
                 } else {
                     LOGGER.error("程序" + processId + "意外退出");
