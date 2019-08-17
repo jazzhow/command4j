@@ -4,8 +4,7 @@ import jazzhow.command4j.exceptions.ProcessExistException;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 public class Test1 {
@@ -23,23 +22,33 @@ public class Test1 {
     }
 
     @Test
-    void test3() throws IOException {
+    void test3() throws IOException, InterruptedException, ProcessExistException {
         CommandManager test = new CommandManager();
-        ExecutorService fixedThreadPool = Executors.newFixedThreadPool(20);
-        for (int i = 0; i < 10; i++) {
-            final int index = i;
-            fixedThreadPool.execute(() -> {
-                String id = "test" + index;
-                String cmd = "D:/software/ffmpeg/bin/ffmpeg -i rtmp://58.200.131.2:1935/livetv/hunantv -f flv -r 25 -g 25 -s 640x360 -an rtmp://localhost/live/" + id + " -vcodec copy  -f flv -an rtmp://localhost/live/" + id + "HD";
-                try {
-                    test.exec("test", cmd);
-                } catch (ProcessExistException ignored) {
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
+        //ExecutorService fixedThreadPool = Executors.newFixedThreadPool(2);
+
+        String id = "test";
+        String cmd = "D:/software/ffmpeg/bin/ffmpeg -i rtmp://58.200.131.2:1935/livetv/hunantv -f flv -r 25 -g 25 -s 640x360 -an rtmp://localhost/live/" + id + " -vcodec copy  -f flv -an rtmp://localhost/live/" + id + "HD";
+        //test.destroy("test");
+        {
+            test.exec("test", cmd);
+            Collection<CommandProcess> allProcess = test.getAllProcess();
+            //System.out.println(allProcess);
         }
-        System.in.read();
+        {
+            test.destroy("test");
+            Collection<CommandProcess> allProcess = test.getAllProcess();
+            //System.out.println(allProcess);
+        }
+        {
+            test.exec("test", cmd);
+            Collection<CommandProcess> allProcess = test.getAllProcess();
+            System.out.println(allProcess);
+        }
+        while (true) {
+            TimeUnit.SECONDS.sleep(1);
+            Collection<CommandProcess> allProcess = test.getAllProcess();
+            System.out.println(allProcess);
+        }
     }
 
     @Test

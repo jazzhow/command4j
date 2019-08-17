@@ -71,11 +71,12 @@ public class CommandProcess {
                         LOGGER.info("程序" + processId + "运行完毕，返回代码: " + processExitValue);
                     } else {
                         LOGGER.warn("程序" + processId + "被外界环境关闭，返回代码: " + processExitValue);
+                        commandManager.removeFromProcessMap(processId);
                     }
                 } else {
                     LOGGER.error("程序" + processId + "意外退出");
+                    commandManager.removeFromProcessMap(processId);
                 }
-                commandManager.removeFromProcessMap(processId);
             }
         });
         processWaitForThread.setName("processWaitForThread-" + processId);
