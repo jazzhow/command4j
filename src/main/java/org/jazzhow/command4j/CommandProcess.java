@@ -1,4 +1,4 @@
-package jazzhow.command4j;
+package org.jazzhow.command4j;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

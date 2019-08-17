@@ -1,6 +1,6 @@
-package jazzhow.command4j;
+package org.jazzhow.command4j;
 
-import jazzhow.command4j.exceptions.ProcessExistException;
+import org.jazzhow.command4j.exceptions.ProcessExistException;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
