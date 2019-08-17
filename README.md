@@ -11,7 +11,7 @@
  ## 使用方法，以junit为例
 ```Java
 @Test
-void test1() throws IOException, InterruptedException, ProcessExistException {
+public void test1() throws IOException, InterruptedException, ProcessExistException {
     //可执行的linux程序，或windows程序，cmd1 与 cmd2执行的内容可以相同可以不同。
     String cmd1 = "D:/software/ffmpeg/bin/ffmpeg -i rtsp://184.72.239.149/vod/mp4://BigBuckBunny_175k.mov -f flv -r 25 -g 25 -s 640x360 -an rtmp://localhost/live/test -vcodec copy  -f flv -an rtmp://localhost/live/test123HD";
     String cmd2 = "D:/software/ffmpeg/bin/ffmpeg -i rtsp://184.72.239.149/vod/mp4://BigBuckBunny_175k.mov -f flv -r 25 -g 25 -s 640x360 -an rtmp://localhost/live/test -vcodec copy  -f flv -an rtmp://localhost/live/test123HD";
