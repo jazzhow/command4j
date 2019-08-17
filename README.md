@@ -4,9 +4,9 @@
  ## 为什么要创建此项目
  当我们需要用java调用本地程序时，使用Runtime.getRuntime().exec(cmd)固然可以，但需要注意需要此方法返回的process
  中获取inputStream、errorStream，需要使用两个线程从中读取内容， 如果忽略这个问题，会导致所执行的本地程序阻塞，
- 开起来就是不报错停在那里了,原因是java中会为所执行的命令开辟一个缓冲区，用于存放命令所产生的输出，报错标准输出，
+ 看起来就是不报错停在那里了,原因是java中会为所执行的命令开辟一个缓冲区，用于存放命令所产生的输出，包括标准输出，
  和错误输出，如果被调用的程序产生的输出较多，而且也不从缓冲中读走，那么时间长了就会导致被调用的程序阻塞。
- 所以本项目就是为了解决此问题，而且不需要手动对 inputStream、errorStream的流进行处理，使用commandManager.exec("一个命令")即可，
+ 所以本项目就是为了解决此问题，而且不需要手动对inputStream、errorStream的流进行处理，使用commandManager.exec("一个命令")即可，
  commandManager会自动帮你处理inputStream、errorStream的流,从而避免被调用的程序阻塞。
 
  ## 使用方法，以junit为例
