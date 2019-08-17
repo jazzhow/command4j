@@ -46,7 +46,7 @@ public class CommandManager {
         if (getProcess(processId) == null) {
             Date now = new Date();
             Process process = Runtime.getRuntime().exec(command);
-            CommandProcess commandProcess = new CommandProcess(processId, process, now, command, processMap);
+            CommandProcess commandProcess = new CommandProcess(processId, process, now, command, this);
             processMap.put(processId, commandProcess);
             return process;
         } else {
@@ -76,6 +76,10 @@ public class CommandManager {
         } else {
             return null;
         }
+    }
+
+    protected synchronized CommandProcess removeFromProcessMap(String processId) {
+        return processMap.remove(processId);
     }
 
     /**

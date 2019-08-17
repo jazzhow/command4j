@@ -7,11 +7,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Date;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class CommandProcess {
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandProcess.class);
     private volatile boolean normalExit = false;
+    private volatile boolean ioStop = false;
     private Process process;
     private String processId;
     /**
@@ -23,80 +23,70 @@ public class CommandProcess {
      */
     private String command;
 
-    public CommandProcess(String processId, Process process, Date execTime, String command, ConcurrentHashMap<String, CommandProcess> processMap) {
+    protected CommandProcess(String processId, Process process, Date execTime, String command, CommandManager commandManager) {
         this.processId = processId;
         this.process = process;
         this.execTime = execTime;
         this.command = command;
-        BufferedReader errBfReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+        final BufferedReader errBfReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
         Thread errBfReaderThread = new Thread(() -> {
+            String line;
             try {
-                String line;
-                while (true) {
-                    try {
-                        if ((line = errBfReader.readLine()) == null) {
-                            break;
-                        }
-                        LOGGER.debug(line);
-                    } catch (IOException e) {
-                        if (normalExit || !process.isAlive()) {
-                            return;
-                        }
-                        LOGGER.error(e.getMessage(), e);
-                    }
+                while (!ioStop && (line = errBfReader.readLine()) != null) {
+                    LOGGER.debug(line);
                 }
+            } catch (IOException ignored) {
             } finally {
-                if (errBfReader != null) {
-                    try {
-                        errBfReader.close();
-                    } catch (IOException ignored) {
-                    }
-
-                    if (normalExit || !process.isAlive()) {
-                        processMap.remove(processId);
-                        int i = process.exitValue();
-                        if (normalExit) {
-                            LOGGER.info("程序" + processId + "运行完毕，返回代码: " + i);
-                        } else {
-                            LOGGER.warn("程序" + processId + "被外界环境关闭，返回代码: " + i);
-                        }
-                    }
+                try {
+                    errBfReader.close();
+                } catch (IOException ignored) {
                 }
             }
         });
-        BufferedReader stdBfReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        final BufferedReader stdBfReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         Thread stdBfReaderThread = new Thread(() -> {
+            String line;
             try {
-                String line;
-                while (true) {
-                    try {
-                        if ((line = stdBfReader.readLine()) == null) {
-                            break;
-                        }
-                        LOGGER.debug(line);
-                    } catch (IOException e) {
-                        if (normalExit || !process.isAlive()) {
-                            return;
-                        }
-                        LOGGER.error(e.getMessage(), e);
-                    }
+                while (!ioStop && (line = stdBfReader.readLine()) != null) {
+                    LOGGER.debug(line);
                 }
+            } catch (IOException ignored) {
             } finally {
-                if (stdBfReader != null) {
-                    try {
-                        stdBfReader.close();
-                    } catch (IOException ignored) {
-                    }
+                try {
+                    stdBfReader.close();
+                } catch (IOException ignored) {
                 }
             }
         });
+        Thread processWaitForThread = new Thread(() -> {
+            Integer processExitValue = null;
+            try {
+                processExitValue = process.waitFor();
+            } catch (InterruptedException e) {
+                process.destroy();
+                LOGGER.error(e.getMessage(), e);
+            } finally {
+                if (processExitValue != null) {
+                    if (normalExit) {
+                        LOGGER.info("程序" + processId + "运行完毕，返回代码: " + processExitValue);
+                    } else {
+                        LOGGER.warn("程序" + processId + "被外界环境关闭，返回代码: " + processExitValue);
+                    }
+                } else {
+                    LOGGER.error("程序" + processId + "意外退出");
+                }
+                commandManager.removeFromProcessMap(processId);
+            }
+        });
+        processWaitForThread.setName("processWaitForThread-" + processId);
         errBfReaderThread.setName("errBfReaderThread-" + processId);
         stdBfReaderThread.setName("stdBfReaderThread-" + processId);
+        processWaitForThread.start();
         errBfReaderThread.start();
         stdBfReaderThread.start();
     }
 
-    public void setNormalExit(boolean normalExit) {
+    protected void setNormalExit(boolean normalExit) {
         this.normalExit = normalExit;
     }
 
