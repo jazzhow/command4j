@@ -39,7 +39,7 @@ public class CommandManager {
      * @param command
      * @return
      */
-    public synchronized Process exec(String processId, String command) throws ProcessExistException, IOException {
+    public synchronized CommandProcess exec(String processId, String command) throws ProcessExistException, IOException {
         LOGGER.info("正在启动程序 " + processId);
         LOGGER.info("启动命令 " + command);
         //先判断是否已存在此程序
@@ -48,7 +48,7 @@ public class CommandManager {
             Process process = Runtime.getRuntime().exec(command);
             CommandProcess commandProcess = new CommandProcess(processId, process, now, command, this);
             processMap.put(processId, commandProcess);
-            return process;
+            return commandProcess;
         } else {
             throw new ProcessExistException("已经存在此id " + processId + "对应的程序，请更换id再启动");
         }
@@ -60,7 +60,7 @@ public class CommandManager {
      * @param processId
      * @return
      */
-    public synchronized Process destroy(String processId) {
+    public synchronized CommandProcess destroy(String processId) {
         LOGGER.info("正在关闭程序" + processId);
         CommandProcess commandProcess = processMap.get(processId);
         if (commandProcess != null) {
@@ -72,7 +72,7 @@ public class CommandManager {
             } else {
                 LOGGER.info("该程序程序" + processId + "已处于关闭状态，无需再次关闭");
             }
-            return process;
+            return commandProcess;
         } else {
             return null;
         }
@@ -87,19 +87,17 @@ public class CommandManager {
      *
      * @return
      */
-    public synchronized List<Process> destroyAll() throws Exception {
-        ArrayList<Process> destroyProcessList = new ArrayList<>();
+    public synchronized List<CommandProcess> destroyAll() throws Exception {
+        ArrayList<CommandProcess> destroyProcessList = new ArrayList<>();
         ArrayList<String> errList = new ArrayList<>();
-        processMap.forEach((processId, commandProcess) -> {
+        Collection<CommandProcess> allProcess = getAllProcess();
+        for (CommandProcess commandProcess : allProcess) {
             try {
-                commandProcess.getProcess().destroy();
-                destroyProcessList.add(commandProcess.getProcess());
+                destroy(commandProcess.getProcessId());
+                destroyProcessList.add(commandProcess);
             } catch (Exception e) {
                 errList.add(e.getMessage());
             }
-        });
-        for (Process id : destroyProcessList) {
-            processMap.remove(id);
         }
         if (!errList.isEmpty()) {
             throw new Exception(StringUtils.join(errList, ","));
