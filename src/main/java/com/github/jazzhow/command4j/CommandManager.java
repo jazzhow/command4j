@@ -35,9 +35,13 @@ public class CommandManager {
     /**
      * 使用代码同步防止同一id下的命令启动多次
      *
-     * @param processId
-     * @param command
-     * @return
+     * @param processId 启动进程的标识,在同一个CommandManager对象中唯一，
+     *                  它的意义是方便通过这个标识关闭这个启动的进程,
+     *                  如果在同一个CommandManager对象中启动两个相同标识进程，那么会抛出一个ProcessExistException异常。
+     * @param command 调用本地程序的命令
+     * @return 返回启动的程序
+     * @throws ProcessExistException 启动进程的标识已存在
+     * @throws IOException 启动命令路径有误
      */
     public synchronized CommandProcess exec(String processId, String command) throws ProcessExistException, IOException {
         LOGGER.info("正在启动程序 " + processId);
@@ -57,8 +61,10 @@ public class CommandManager {
     /**
      * 停止任务
      *
-     * @param processId
-     * @return
+     * @param processId  启动进程的标识,在同一个CommandManager对象中唯一，
+     *                   它的意义是方便通过这个标识关闭这个启动的进程,
+     *                   如果在同一个CommandManager对象中启动两个相同标识进程，那么会抛出一个ProcessExistException异常。
+     * @return 返回启动的程序
      */
     public synchronized CommandProcess destroy(String processId) {
         LOGGER.info("正在关闭程序" + processId);
@@ -85,7 +91,8 @@ public class CommandManager {
     /**
      * 停止全部任务
      *
-     * @return
+     * @return 被关闭的CommandProcess的集合
+     * @throws Exception Exception
      */
     public synchronized List<CommandProcess> destroyAll() throws Exception {
         ArrayList<CommandProcess> destroyProcessList = new ArrayList<>();
