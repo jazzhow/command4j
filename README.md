@@ -9,7 +9,14 @@
  所以本项目就是为了解决此问题，而且不需要手动对inputStream、errorStream的流进行处理，使用commandManager.exec("一个命令")即可，
  commandManager会自动帮你处理inputStream、errorStream的流,从而避免被调用的程序阻塞。
 
- ## 使用方法，以junit为例
+ ## 使用方法
+    引入依赖
+    <dependency>
+      <groupId>com.github.jazzhow</groupId>
+      <artifactId>command4j</artifactId>
+      <version>2.0.0-RELEASE</version>
+    </dependency>
+    
     ```Java
     @Test
     void test1() throws IOException, InterruptedException, ProcessExistException {
