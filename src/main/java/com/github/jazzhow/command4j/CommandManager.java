@@ -54,8 +54,8 @@ public class CommandManager {
         if (getProcess(processId) == null) {
             Date now = new Date();
             Process process = Runtime.getRuntime().exec(commandBuilder.toString());
-            CommandProcess commandProcess =
-                    new CommandProcess(processId, process, now, commandBuilder.toString(), this);
+            CommandProcess commandProcess = new CommandProcess(
+                    processId, process, now, commandBuilder.toString(), new ArrayList<>(), this);
             processMap.put(processId, commandProcess);
             return commandProcess;
         } else {
@@ -72,9 +72,9 @@ public class CommandManager {
     private StringBuilder getStringBuilder(String command) {
         StringBuilder commandBuilder = new StringBuilder();
         if (System.getProperty(SYSTEM_NAME).toUpperCase().contains(SYSTEM_WIN)) {
-            commandBuilder.append("cmd").append("/c");
+            commandBuilder.append("cmd ").append("/c ");
         } else {
-            commandBuilder.append("/bin/sh").append("-c");
+            commandBuilder.append("/bin/sh ").append("-c ");
         }
         commandBuilder.append(command);
         return commandBuilder;

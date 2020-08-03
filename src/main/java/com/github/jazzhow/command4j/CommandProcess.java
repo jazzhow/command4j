@@ -4,10 +4,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Date;
-import java.util.concurrent.*;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class CommandProcess {
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandProcess.class);
@@ -24,12 +28,17 @@ public class CommandProcess {
      */
     private String command;
 
+    /**
+     * 执行命令后系统显示的内容
+     */
+    private List<String> response;
+
     private static ExecutorService executorService;
 
     static {
         executorService = new ThreadPoolExecutor(3, 5, 10L,
                 TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(2048),
+                new LinkedBlockingQueue<>(1024),
                 r -> {
                     Thread thread = new Thread(r);
                     thread.setName(r.getClass().getName());
@@ -39,15 +48,19 @@ public class CommandProcess {
     }
 
 
-    protected CommandProcess(String processId, Process process, Date execTime, String command, CommandManager commandManager) {
+    protected CommandProcess(String processId,
+                             Process process,
+                             Date execTime,
+                             String command,
+                             List<String> response,
+                             CommandManager commandManager) {
         this.processId = processId;
         this.process = process;
         this.execTime = execTime;
         this.command = command;
-        final BufferedReader errBfReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-        final BufferedReader stdBfReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        executorService.execute(() -> executeBfReader(errBfReader));
-        executorService.execute(() -> executeBfReader(stdBfReader));
+        this.response = response;
+        executorService.execute(() -> executeBfReader(process.getErrorStream()));
+        executorService.execute(() -> executeBfReader(process.getInputStream()));
         executorService.execute(() -> executeProcessWaitFor(processId, process, commandManager));
         executorService.shutdown();
     }
@@ -78,18 +91,17 @@ public class CommandProcess {
         }
     }
 
-    private void executeBfReader(BufferedReader errBfReader) {
+    private void executeBfReader(InputStream process) {
         String line;
-        try {
+        try (
+                BufferedReader errBfReader = new BufferedReader(new InputStreamReader(process));
+        ) {
             while (!ioStop && (line = errBfReader.readLine()) != null) {
+                response.add(line);
                 LOGGER.debug(line);
             }
-        } catch (IOException ignored) {
-        } finally {
-            try {
-                errBfReader.close();
-            } catch (IOException ignored) {
-            }
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -111,5 +123,9 @@ public class CommandProcess {
 
     public String getCommand() {
         return command;
+    }
+
+    public List<String> getResponse() {
+        return response;
     }
 }
