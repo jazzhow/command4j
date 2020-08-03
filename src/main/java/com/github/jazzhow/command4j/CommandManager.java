@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CommandManager {
+    private static final String SYSTEM_NAME = "os.name";
+    private static final String SYSTEM_WIN = "WIN";
     private static final Logger LOGGER = LoggerFactory.getLogger(CommandManager.class);
     private ConcurrentHashMap<String, CommandProcess> processMap = new ConcurrentHashMap<>();
 
@@ -44,18 +46,38 @@ public class CommandManager {
      * @throws IOException           启动命令路径有误
      */
     public synchronized CommandProcess exec(String processId, String command) throws ProcessExistException, IOException {
+        StringBuilder commandBuilder = getStringBuilder(command);
         LOGGER.info("正在启动程序 " + processId);
-        LOGGER.info("启动命令 " + command);
+        LOGGER.info("启动命令 " + commandBuilder.toString());
+
         //先判断是否已存在此程序
         if (getProcess(processId) == null) {
             Date now = new Date();
-            Process process = Runtime.getRuntime().exec(command);
-            CommandProcess commandProcess = new CommandProcess(processId, process, now, command, this);
+            Process process = Runtime.getRuntime().exec(commandBuilder.toString());
+            CommandProcess commandProcess =
+                    new CommandProcess(processId, process, now, commandBuilder.toString(), this);
             processMap.put(processId, commandProcess);
             return commandProcess;
         } else {
             throw new ProcessExistException("已经存在此id " + processId + "对应的程序，请更换id再启动");
         }
+    }
+
+    /**
+     * 判断是window系统，还是linux。并添加对应系统的命令前缀
+     *
+     * @param command String
+     * @return commandBuilder
+     */
+    private StringBuilder getStringBuilder(String command) {
+        StringBuilder commandBuilder = new StringBuilder();
+        if (System.getProperty(SYSTEM_NAME).toUpperCase().contains(SYSTEM_WIN)) {
+            commandBuilder.append("cmd").append("/c");
+        } else {
+            commandBuilder.append("/bin/sh").append("-c");
+        }
+        commandBuilder.append(command);
+        return commandBuilder;
     }
 
     /**
