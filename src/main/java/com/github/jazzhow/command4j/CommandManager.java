@@ -95,6 +95,7 @@ public class CommandManager {
             commandProcess.setNormalExit(true);
             Process process = commandProcess.getProcess();
             if (process.isAlive()) {
+                commandProcess.shutdownExecutor();
                 process.destroy();
                 processMap.remove(processId);
             } else {

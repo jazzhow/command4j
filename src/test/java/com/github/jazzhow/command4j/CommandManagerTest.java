@@ -38,5 +38,9 @@ public class CommandManagerTest {
         //关闭一个不存在的标识
         CommandProcess huhuhah = commandManager.destroy("呼呼哈哈");
         System.out.println("destroy传入commandManager中不存在的标识返回： " + huhuhah);
+        if (!process2.getProcess().isAlive()){
+            //process2的执行命令后系统的显示
+            process2.getResponse().forEach(System.out::println);
+        }
     }
 }

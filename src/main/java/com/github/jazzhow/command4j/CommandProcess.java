@@ -47,7 +47,6 @@ public class CommandProcess {
                 new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
-
     protected CommandProcess(String processId,
                              Process process,
                              Date execTime,
@@ -62,7 +61,6 @@ public class CommandProcess {
         executorService.execute(() -> executeBfReader(process.getErrorStream()));
         executorService.execute(() -> executeBfReader(process.getInputStream()));
         executorService.execute(() -> executeProcessWaitFor(processId, process, commandManager));
-        executorService.shutdown();
     }
 
     private void executeProcessWaitFor(String processId, Process process, CommandManager commandManager) {
@@ -105,6 +103,10 @@ public class CommandProcess {
         }
     }
 
+    public void shutdownExecutor() {
+        executorService.shutdown();
+    }
+
     protected void setNormalExit(boolean normalExit) {
         this.normalExit = normalExit;
     }
@@ -127,5 +129,9 @@ public class CommandProcess {
 
     public List<String> getResponse() {
         return response;
+    }
+
+    public static ExecutorService getExecutorService() {
+        return executorService;
     }
 }
